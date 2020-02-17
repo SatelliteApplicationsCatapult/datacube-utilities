@@ -15,7 +15,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/SatelliteApplicationsCatapult/datacube-utilities",
-    packages=setuptools.find_packages(include=['datacube-utilities']),
+    packages=setuptools.find_packages(include=['datacube_utilities']),
     install_requires=requirements,
     classifiers=[
         "Programming Language :: Python :: 3",
