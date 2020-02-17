@@ -31,8 +31,9 @@ import hdmedians as hd
 
 import datacube
 
-import dc_utilities as utilities
-from dc_utilities import create_default_clean_mask
+from . import dc_utilities as utilities
+from .dc_utilities import create_default_clean_mask
+
 import hdmedians as hd
 
 """
