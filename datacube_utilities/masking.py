@@ -4,10 +4,11 @@ def mask_good_quality(ds, product):
     """
     if product.startswith("s2"):
         good_quality = (
-            (ds.scene_classification == 4)
-            | (ds.scene_classification == 5)  # mask in VEGETATION
-            | (ds.scene_classification == 6)  # mask in NOT_VEGETATED
-            | (ds.scene_classification == 7)  # mask in WATER  # mask in UNCLASSIFIED
+            (ds.scene_classification == 2)    # mask in DARK_AREA_PIXELS
+            | (ds.scene_classification == 4)  # mask in VEGETATION
+            | (ds.scene_classification == 5)  # mask in NOT_VEGETATED
+            | (ds.scene_classification == 6)  # mask in WATER
+            | (ds.scene_classification == 7)  # mask in UNCLASSIFIED
         )
     elif product.startswith("ls8"):
         good_quality = (
