@@ -9,9 +9,9 @@ def geomedian(ds, product, all_measurements):
     xx_clean = odc.algo.keep_good_only(xx_data, where=good_quality)
 
     scale, offset = (
-        1 / 10_000,
+        1 / 10_000,  # differs per product, aim for 0-1 values in float32
         0,
-    )  # differs per product, aim for 0-1 values in float32
+    )
 
     xx_clean = odc.algo.to_f32(xx_clean, scale=scale, offset=offset)
     yy = odc.algo.xr_geomedian(
