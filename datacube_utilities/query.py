@@ -1,3 +1,4 @@
+import logging
 import re
 import xarray as xr
 from pyproj import Proj, transform
@@ -9,6 +10,7 @@ def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
     inProj = Proj(+aoi_crs)
     outProj = Proj("EPSG:3460")
 
+    logging.error(f"translating aoi from {aoi_crs} to EPSG:3460")
     min_lat, max_lat = lat_extents
     min_lon, max_lon = lon_extents
 
