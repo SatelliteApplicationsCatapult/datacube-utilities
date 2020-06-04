@@ -11,6 +11,7 @@ def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
     outProj = Proj("EPSG:3460")
 
     logging.error(f"translating aoi from {aoi_crs} to EPSG:3460")
+
     min_lat, max_lat = lat_extents
     min_lon, max_lon = lon_extents
 
@@ -23,8 +24,8 @@ def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
     resolution = (-res, res)
 
     query = {
-        "latitude": lat_range,
-        "longitude": lon_range,
+        "y": lat_range,
+        "x": lon_range,
         "output_crs": output_projection,
         "resolution": resolution,
         "dask_chunks": dask_chunks,
