@@ -15,11 +15,17 @@ def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
     min_lat, max_lat = lat_extents
     min_lon, max_lon = lon_extents
 
+    logging.info(f"lat_extents: {lat_extents}")
+    logging.info(f"lon_extents: {lon_extents}")
+    
     x_A, y_A = transform(inProj, outProj, min_lon, min_lat)
     x_B, y_B = transform(inProj, outProj, max_lon, max_lat)
 
     lat_range = (y_A, y_B)
     lon_range = (x_A, x_B)
+
+    logging.info(f"lat_range: {lat_range}")
+    logging.info(f"lon_range: {lon_range}")
 
     resolution = (-res, res)
 
@@ -31,6 +37,7 @@ def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
         "dask_chunks": dask_chunks,
         "crs": "EPSG:3460",
     }
+    logging.info(f"{query}")
     return query
 
 
