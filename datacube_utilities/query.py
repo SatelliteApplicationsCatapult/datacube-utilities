@@ -7,8 +7,8 @@ from datacube_utilities.createAOI import create_lat_lon
 
 def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
     lat_extents, lon_extents = create_lat_lon(aoi)
-    inProj = Proj(aoi_crs)
-    outProj = Proj("EPSG:3460")
+    inProj = Proj("+init=" + aoi_crs)
+    outProj = Proj("+init=EPSG:3460")
 
     logging.error(f"translating aoi from {aoi_crs} to EPSG:3460")
 
@@ -23,10 +23,10 @@ def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
 
     lat_range = (y_A, y_B)
     lon_range = (x_A, x_B)
-
+    
     logging.info(f"lat_range: {lat_range}")
     logging.info(f"lon_range: {lon_range}")
-
+    
     resolution = (-res, res)
 
     query = {
