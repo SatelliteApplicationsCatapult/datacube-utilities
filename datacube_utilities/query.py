@@ -30,8 +30,8 @@ def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
     resolution = (-res, res)
 
     query = {
-        "latitude": lat_range,
-        "longitude": lon_range,
+        "y": lat_range,
+        "x": lon_range,
         "output_crs": output_projection,
         "resolution": resolution,
         "dask_chunks": dask_chunks,
