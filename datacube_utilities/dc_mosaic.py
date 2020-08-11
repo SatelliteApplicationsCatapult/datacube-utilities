@@ -279,7 +279,7 @@ def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=Non
     return dataset_out
 
 
-def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=[-9999, 0, np.float('nan')], dtype=None, intermediate_product=None, **kwargs):
+def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=None, intermediate_product=None, **kwargs):
     """
     Method for calculating the pixel value for the min ndvi value.
 
@@ -525,12 +525,12 @@ def restore_or_convert_dtypes(dtype_for_all, band_list, dataset_in_dtypes, datas
     if dtype_for_all is not None:
         # Integer types can't represent nan.
         if np.issubdtype(dtype_for_all, np.integer): # This also works for Python int type.
-            utilities.nan_to_num(dataset_out, no_data)
+            dataset_out.fillna(no_data)
         convert_to_dtype(dataset_out, dtype_for_all)
     else:  # Restore dtypes to state before masking.
         for band in band_list:
             band_dtype = dataset_in_dtypes[band]
             if np.issubdtype(band_dtype, np.integer):
-                utilities.nan_to_num(dataset_out[band], no_data)
+                dataset_out[band].fillna(no_data)
             dataset_out[band] = dataset_out[band].astype(band_dtype)
     return dataset_out
