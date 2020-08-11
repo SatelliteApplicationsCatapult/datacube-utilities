@@ -61,7 +61,7 @@ def convert_to_dtype(data, dtype):
 Compositing Functions
 """
 
-def create_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=None, intermediate_product=None, **kwargs):
+def create_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dtype=None, intermediate_product=None, **kwargs):
     """
     Creates a most-recent-to-oldest mosaic of the input dataset.
 
@@ -125,7 +125,7 @@ def create_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=None, interm
     dataset_out = restore_or_convert_dtypes(dtype, band_list, dataset_in_dtypes, dataset_out, no_data)
     return dataset_out
 
-def create_mean_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=None, **kwargs):
+def create_mean_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dtype=None, **kwargs):
     """
     Method for calculating the mean pixel value for a given dataset.
 
@@ -215,7 +215,7 @@ def create_median_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dtyp
     return dataset_out
 
 
-def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=None, intermediate_product=None, **kwargs):
+def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dtype=None, intermediate_product=None, **kwargs):
     """
     Method for calculating the pixel value for the max ndvi value.
 
@@ -279,7 +279,7 @@ def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=Non
     return dataset_out
 
 
-def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=None, intermediate_product=None, **kwargs):
+def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dtype=None, intermediate_product=None, **kwargs):
     """
     Method for calculating the pixel value for the min ndvi value.
 
