@@ -182,11 +182,7 @@ def nan_to_num(data, number):
     ----------
     data: xarray.Dataset or xarray.DataArray
     """
-    if isinstance(data, xr.Dataset):
-        for key in list(data.data_vars):
-            data[key].values[np.isnan(data[key].values)] = number
-    elif isinstance(data, xr.DataArray):
-        data.values[np.isnan(data.values)] = number
+    data.fillna(number)
 
 
 def clear_attrs(dataset):
