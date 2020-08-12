@@ -29,7 +29,6 @@ def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
         "dask_chunks": dask_chunks,
         "crs": "EPSG:3460",
     }
-    logging.info(f"{query}")
     return query
 
 
