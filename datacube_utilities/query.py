@@ -1,20 +1,35 @@
-import logging
 import re
 import xarray as xr
 from pyproj import Proj, transform
 from datacube_utilities.createAOI import create_lat_lon
 
 
-def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
+def create_base_query(aoi, res, output_crs, aoi_crs, dask_chunks, cube_crs="EPSG:3460"):
+    """
+    create_base_query sets up the basic data cube query and makes sure the AOI is in the right CRS
+
+    Parameters
+    ----------
+    aoi: WKT formatted string.
+    res: Int Resolution of the output images
+    output_crs: Resulting projection string EPSG code.
+    aoi_crs: Projection string EPSG code of the AOI . Does not have to be the same as the output.
+    dask_chunks: Number of dask chunks to split the resulting data into.
+    cube_crs: The Projection string EPSG code used by the data cube.
+
+    Returns
+    -------
+    query: A query object ready to be fed into dc.load
+    """
     lat_extents, lon_extents = create_lat_lon(aoi)
-    inProj = Proj("+init=" + aoi_crs)
-    outProj = Proj("+init=EPSG:3460")
+    in_proj = Proj("+init=" + aoi_crs)
+    out_proj = Proj("+init=" + cube_crs)
 
     min_lat, max_lat = lat_extents
     min_lon, max_lon = lon_extents
     
-    x_A, y_A = transform(inProj, outProj, min_lon, min_lat)
-    x_B, y_B = transform(inProj, outProj, max_lon, max_lat)
+    x_A, y_A = transform(in_proj, out_proj, min_lon, min_lat)
+    x_B, y_B = transform(in_proj, out_proj, max_lon, max_lat)
 
     lat_range = (y_A, y_B)
     lon_range = (x_A, x_B)
@@ -24,10 +39,10 @@ def create_base_query(aoi, res, output_projection, aoi_crs, dask_chunks):
     query = {
         "y": lat_range,
         "x": lon_range,
-        "output_crs": output_projection,
+        "output_crs": output_crs,
         "resolution": resolution,
         "dask_chunks": dask_chunks,
-        "crs": "EPSG:3460",
+        "crs": cube_crs,
     }
     return query
 
