@@ -1,3 +1,4 @@
+import logging
 import time
 import numpy as np
 import xarray as xr
@@ -127,9 +128,11 @@ def export_xarray_to_geotiff(data, tif_path, bands=None, no_data=-9999, crs="EPS
     x_coord, y_coord: string
         The string names of the x and y dimensions.
     """
+    logging.info(f"starting output to {tif_path}")
     if isinstance(data, xr.DataArray):
         height, width = data.sizes[y_coord], data.sizes[x_coord]
         count, dtype = 1, data.dtype
+        logging.info(f"got an xarray with width {width} and height {height} and datatype {dtype}")
     else:
         if bands is None:
             bands = list(data.data_vars.keys())
@@ -139,6 +142,7 @@ def export_xarray_to_geotiff(data, tif_path, bands=None, no_data=-9999, crs="EPS
             assert len(bands) > 0 and isinstance(bands[0], str), assrt_msg_begin + "You must supply at least one band."
         height, width = data.dims[y_coord], data.dims[x_coord]
         count, dtype = len(bands), data[bands[0]].dtype
+        logging.info(f"got not an xarray with width {width} and height {height} and datatype {dtype}")
     with rasterio.open(
             tif_path,
             'w',
@@ -150,11 +154,16 @@ def export_xarray_to_geotiff(data, tif_path, bands=None, no_data=-9999, crs="EPS
             crs=crs,
             transform=_get_transform_from_xr(data, x_coord=x_coord, y_coord=y_coord),
             nodata=no_data) as dst:
+        logging.info(f"opened {tif_path}")
         if isinstance(data, xr.DataArray):
             dst.write(data.values, 1)
+            logging.info(f"written xarray band")
         else:
             for index, band in enumerate(bands):
                 dst.write(data[band].values.astype(dtype), index + 1)
+                logging.info(f"written non xarray band {index}")
     dst.close()
+    logging.info(f"done writing {tif_path}")
+
 
 ## End export ##
