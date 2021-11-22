@@ -18,6 +18,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import logging
 
 import gdal, osr
 import numpy as np
@@ -261,9 +262,11 @@ def write_geotiff_from_xr(tif_path, data, bands=None, no_data=-9999, crs="EPSG:4
     x_coord, y_coord: string
         The string names of the x and y dimensions.
     """
+    logging.info(f"starting output to {tif_path}")
     if isinstance(data, xr.DataArray):
         height, width = data.sizes[y_coord], data.sizes[x_coord]
         count, dtype = 1, data.dtype
+        logging.info(f"got an xarray with width {width} and height {height} and datatype {dtype}")
     else:
         if bands is None:
             bands = list(data.data_vars.keys())
@@ -273,6 +276,7 @@ def write_geotiff_from_xr(tif_path, data, bands=None, no_data=-9999, crs="EPSG:4
             assert len(bands) > 0 and isinstance(bands[0], str), assrt_msg_begin + "You must supply at least one band."
         height, width = data.dims[y_coord], data.dims[x_coord]
         count, dtype = len(bands), data[bands[0]].dtype
+        logging.info(f"got not an xarray with width {width} and height {height} and datatype {dtype}")
     with rasterio.open(
             tif_path,
             'w',
@@ -284,12 +288,16 @@ def write_geotiff_from_xr(tif_path, data, bands=None, no_data=-9999, crs="EPSG:4
             crs=crs,
             transform=_get_transform_from_xr(data, x_coord=x_coord, y_coord=y_coord),
             nodata=no_data) as dst:
+        logging.info(f"opened {tif_path}")
         if isinstance(data, xr.DataArray):
             dst.write(data.values, 1)
+            logging.info(f"written xarray band")
         else:
             for index, band in enumerate(bands):
-                dst.write(data[band].values, index + 1)
+                dst.write(data[band].values.astype(dtype), index + 1)
+                logging.info(f"written non xarray band {index}")
     dst.close()
+    logging.info(f"done writing {tif_path}")
 
 
 def write_png_from_xr(png_path, dataset, bands, png_filled_path=None, fill_color='red', scale=None, low_res=False,
