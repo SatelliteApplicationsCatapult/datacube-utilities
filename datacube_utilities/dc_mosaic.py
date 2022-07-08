@@ -27,14 +27,12 @@ import xarray as xr
 from datetime import datetime
 import collections
 from collections import OrderedDict
-import hdmedians as hd
 
 import datacube
 
 from . import dc_utilities as utilities
 from .dc_utilities import create_default_clean_mask
 
-import hdmedians as hd
 
 """
 Utility Functions
@@ -480,7 +478,7 @@ def create_hdmedians_multiple_band_mosaic(dataset_in,
                                           lat_shape * lon_shape)
     # Build zeroes array across time slices.
     hdmedians_result = np.zeros((bands_shape, lat_shape * lon_shape))
-
+    import hdmedians as hd
     # For each pixel (lat/lon combination), find the geomedian or geomedoid across time.
     for x in range(reshaped_stack.shape[2]):
         try:
