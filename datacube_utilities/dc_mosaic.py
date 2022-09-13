@@ -263,7 +263,7 @@ def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dt
     for timeslice in time_slices:
         dataset_slice = dataset_in.isel(time=timeslice).drop('time')
         ndvi = (dataset_slice.nir - dataset_slice.red) / (dataset_slice.nir + dataset_slice.red)
-        ndvi.values[np.invert(clean_mask)[timeslice, ::]] = -1000000000
+        ndvi.values[np.invert(clean_mask[timeslice, :, :])[timeslice, ::]] = -1000000000
         dataset_slice['ndvi'] = ndvi
         if dataset_out is None:
             dataset_out = dataset_slice.copy(deep=True)
@@ -327,7 +327,7 @@ def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dt
     for timeslice in time_slices:
         dataset_slice = dataset_in.isel(time=timeslice).drop('time')
         ndvi = (dataset_slice.nir - dataset_slice.red) / (dataset_slice.nir + dataset_slice.red)
-        ndvi.values[np.invert(clean_mask)[timeslice, ::]] = 1000000000
+        ndvi.values[np.invert(clean_mask[timeslice, :, :])[timeslice, ::]] = 1000000000
         dataset_slice['ndvi'] = ndvi
         if dataset_out is None:
             dataset_out = dataset_slice.copy(deep=True)
