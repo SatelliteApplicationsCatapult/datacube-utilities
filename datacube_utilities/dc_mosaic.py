@@ -284,7 +284,7 @@ def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dt
     dataset_out = restore_or_convert_dtypes(dtype, data_var_name_list, dataset_in_dtypes, dataset_out, no_data)
     return dataset_out
 
-def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=None, intermediate_product=None, **kwargs):
+def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dtype=None, intermediate_product=None, **kwargs):
     """
     Method for calculating the pixel value for the min ndvi value.
     Parameters
