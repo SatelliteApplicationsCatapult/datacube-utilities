@@ -262,16 +262,22 @@ def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dt
     time_slices = range(len(dataset_in.time))
     for timeslice in time_slices:
         dataset_slice = dataset_in.isel(time=timeslice).drop('time')
+        clean_mask_slice = clean_mask[timeslice]
+        # Mask out missing and unclean data.
+        dataset_slice = dataset_slice.where((dataset_slice != no_data) & clean_mask_slice)
         ndvi = (dataset_slice.nir - dataset_slice.red) / (dataset_slice.nir + dataset_slice.red)
-        ndvi.values[np.invert(clean_mask[timeslice, :, :])[timeslice, ::]] = -1000000000
+        # Set unclean areas to an arbitrarily low value so they
+        # are not used (this is a max mosaic).
+        ndvi.values[np.invert(clean_mask_slice)] = -1000000000
         dataset_slice['ndvi'] = ndvi
         if dataset_out is None:
-            dataset_out = dataset_slice.copy(deep=True)
+            dataset_out = dataset_slice
             utilities.clear_attrs(dataset_out)
         else:
+            use_mask = dataset_slice.ndvi.values > dataset_out.ndvi.values
             for key in list(dataset_slice.data_vars):
-                dataset_out[key].values[dataset_slice.ndvi.values > dataset_out.ndvi.values] = \
-                    dataset_slice[key].values[dataset_slice.ndvi.values > dataset_out.ndvi.values]
+                dataset_out[key].values[use_mask] = \
+                    dataset_slice[key].values[use_mask]
     # Handle datatype conversions.
     dataset_out = restore_or_convert_dtypes(dtype, band_list, dataset_in_dtypes, dataset_out, no_data)
     return dataset_out
@@ -326,17 +332,20 @@ def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dt
     time_slices = range(len(dataset_in.time))
     for timeslice in time_slices:
         dataset_slice = dataset_in.isel(time=timeslice).drop('time')
+        clean_mask_slice = clean_mask[timeslice]
+        # Mask out missing and unclean data.
+        dataset_slice = dataset_slice.where((dataset_slice != no_data) & clean_mask_slice)
         ndvi = (dataset_slice.nir - dataset_slice.red) / (dataset_slice.nir + dataset_slice.red)
-        ndvi.values[np.invert(clean_mask[timeslice, :, :])[timeslice, ::]] = 1000000000
+        ndvi.values[np.invert(clean_mask_slice)] = 1000000000
         dataset_slice['ndvi'] = ndvi
         if dataset_out is None:
-            dataset_out = dataset_slice.copy(deep=True)
+            dataset_out = dataset_slice
             utilities.clear_attrs(dataset_out)
         else:
+            use_mask = dataset_slice.ndvi.values > dataset_out.ndvi.values
             for key in list(dataset_slice.data_vars):
-                dataset_out[key].values[dataset_slice.ndvi.values <
-                                        dataset_out.ndvi.values] = dataset_slice[key].values[dataset_slice.ndvi.values <
-                                                                                             dataset_out.ndvi.values]
+                dataset_out[key].values[use_mask] = \
+                    dataset_slice[key].values[use_mask]
     # Handle datatype conversions.
     dataset_out = restore_or_convert_dtypes(dtype, band_list, dataset_in_dtypes, dataset_out, no_data)
     return dataset_out
