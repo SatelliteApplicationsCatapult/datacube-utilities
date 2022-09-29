@@ -335,7 +335,7 @@ def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=Non
         clean_mask_slice = clean_mask[timeslice]
 
         # Mask out missing and unclean data.
-        dataset_slice = dataset_slice.where((dataset_slice != no_data) & clean_mask_slice) # What this is 
+        dataset_slice = dataset_slice.where((dataset_slice != no_data) & clean_mask_slice)
 
         # Create NDVI
         dataset_slice['ndvi'] = (dataset_slice.nir - dataset_slice.red) / (dataset_slice.nir + dataset_slice.red) # What this does is create a new variable called 'ndvi' in the dataset_slice object
