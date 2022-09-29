@@ -213,7 +213,7 @@ def create_median_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dtyp
     return dataset_out
 
 
-def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dtype=None, intermediate_product=None, **kwargs):
+def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=None, intermediate_product=None, **kwargs):
     """
     Method for calculating the pixel value for the max ndvi value.
     Parameters
@@ -284,7 +284,7 @@ def create_max_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dt
     dataset_out = restore_or_convert_dtypes(dtype, data_var_name_list, dataset_in_dtypes, dataset_out, no_data)
     return dataset_out
 
-def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dtype=None, intermediate_product=None, **kwargs):
+def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=-9999, dtype=None, intermediate_product=None, **kwargs):
     """
     Method for calculating the pixel value for the min ndvi value.
     Parameters
@@ -308,8 +308,6 @@ def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dt
         coordinates: latitude, longitude
         variables: same as dataset_in
     """
-    dataset_in = dataset_in.copy(deep=True)
-
     # Default to masking nothing.
     if clean_mask is None:
         clean_mask = create_default_clean_mask(dataset_in)
@@ -321,9 +319,9 @@ def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dt
         dataset_in_dtypes = {}
         for data_var in data_var_name_list:
             dataset_in_dtypes[data_var] = dataset_in[data_var].dtype
-            
+
     # Mask out clouds and scan lines.
-    dataset_in = dataset_in.where((dataset_in != -9999) & clean_mask)
+    dataset_in = dataset_in.where((dataset_in != no_data) & clean_mask)
 
     if intermediate_product is not None:
         dataset_out = intermediate_product.copy(deep=True)
@@ -332,24 +330,30 @@ def create_min_ndvi_mosaic(dataset_in, clean_mask=None, no_data=float('nan'), dt
 
     time_slices = range(len(dataset_in.time))
     for timeslice in time_slices:
+        # Create slices for each time slice
         dataset_slice = dataset_in.isel(time=timeslice).drop('time')
         clean_mask_slice = clean_mask[timeslice]
+
         # Mask out missing and unclean data.
-        dataset_slice = dataset_slice.where((dataset_slice != no_data) & clean_mask_slice)
-        ndvi = (dataset_slice.nir - dataset_slice.red) / (dataset_slice.nir + dataset_slice.red)
-        ndvi.values[np.invert(clean_mask_slice)] = 1000000000
-        dataset_slice['ndvi'] = ndvi
+        dataset_slice = dataset_slice.where((dataset_slice != no_data) & clean_mask_slice) # What this is 
+
+        # Create NDVI
+        dataset_slice['ndvi'] = (dataset_slice.nir - dataset_slice.red) / (dataset_slice.nir + dataset_slice.red) # What this does is create a new variable called 'ndvi' in the dataset_slice object
+        dataset_slice['ndvi'].values[np.invert(clean_mask_slice)] = 1000000000 # Set unclean areas to an arbitrarily high value so they are not used (this is a min mosaic).
+
+        # Run on first iteration
         if dataset_out is None:
-            dataset_out = dataset_slice
-            utilities.clear_attrs(dataset_out)
-        else:
-            use_mask = dataset_slice.ndvi.values > dataset_out.ndvi.values
-            for key in list(dataset_slice.data_vars):
-                dataset_out[key].values[use_mask] = \
-                    dataset_slice[key].values[use_mask]
+            dataset_out = dataset_slice # This is the first time slice
+            utilities.clear_attrs(dataset_out) # Clear attributes
+
+        use_mask = dataset_slice.ndvi.values < dataset_out.ndvi.values
+        for key in list(dataset_slice.data_vars): # Loop through each variable in the dataset
+            dataset_out[key].values[use_mask] = dataset_slice[key].values[use_mask] # Replace the output dataset NDVI with the current slice NDVI
+
     # Handle datatype conversions.
     dataset_out = restore_or_convert_dtypes(dtype, data_var_name_list, dataset_in_dtypes, dataset_out, no_data)
     return dataset_out
+
 def unpack_bits(land_cover_endcoding, data_array, cover_type):
     """
 	Description:
